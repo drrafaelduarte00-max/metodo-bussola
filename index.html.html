@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Método Bússola — Template Operacional</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #042C53;
+    --blue:    #185FA5;
+    --blue-lt: #E6F1FB;
+    --blue-md: #378ADD;
+    --teal:    #0F6E56;
+    --teal-lt: #E1F5EE;
+    --amber:   #854F0B;
+    --amber-lt:#FAEEDA;
+    --coral:   #993C1D;
+    --coral-lt:#FAECE7;
+    --gray-lt: #F1EFE8;
+    --gray-md: #D3D1C7;
+    --gray:    #5F5E5A;
+    --green:   #3B6D11;
+    --green-lt:#EAF3DE;
+    --red:     #A32D2D;
+    --red-lt:  #FCEBEB;
+    --white:   #FFFFFF;
+    --text:    #2C2C2A;
+    --radius:  8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f9;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--navy);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-brand {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-brand .compass {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--blue); display: flex; align-items: center;
+    justify-content: center; margin-bottom: 10px;
+    font-size: 18px;
+  }
+  .sidebar-brand h1 {
+    font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2;
+  }
+  .sidebar-brand p {
+    font-size: 11px; color: #B5D4F4; margin-top: 3px;
+  }
+
+  .sidebar-nav { padding: 12px 0; flex: 1; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; cursor: pointer;
+    font-size: 13px; color: #B5D4F4;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-item.active {
+    color: #fff; background: rgba(255,255,255,0.1);
+    border-left-color: var(--blue-md);
+  }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 10px; color: rgba(255,255,255,0.35);
+    line-height: 1.5;
+  }
+
+  /* ── MAIN ── */
+  .main { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-md);
+  }
+  .page-header h2 { font-size: 20px; font-weight: 700; color: var(--navy); }
+  .page-header p { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--gray-md);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 600; color: var(--navy);
+    margin-bottom: 14px;
+  }
+
+  /* ── METRIC GRID ── */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .metric-card {
+    background: var(--gray-lt);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .metric-card .label { font-size: 11px; color: var(--gray); margin-bottom: 4px; }
+  .metric-card .value { font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .metric-card .sub { font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+  /* ── FORM ── */
+  .form-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    align-items: flex-end; margin-bottom: 0;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+  .field label { font-size: 11px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input, .field select {
+    height: 36px; padding: 0 10px;
+    border: 1px solid var(--gray-md); border-radius: var(--radius);
+    font-size: 13px; color: var(--text); background: var(--white);
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--blue); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    height: 36px; padding: 0 16px;
+    border-radius: var(--radius); border: 1px solid var(--gray-md);
+    background: var(--white); color: var(--text);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { background: var(--gray-lt); }
+  .btn-primary {
+    background: var(--blue); color: #fff; border-color: var(--blue);
+  }
+  .btn-primary:hover { background: var(--navy); border-color: var(--navy); }
+  .btn-danger { color: var(--red); }
+  .btn-danger:hover { background: var(--red-lt); border-color: var(--red); }
+  .btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--gray-md); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--navy); color: #fff;
+    padding: 10px 12px; text-align: left;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; white-space: nowrap;
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--gray-lt); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--gray-lt); }
+  tr:hover td { background: var(--blue-lt); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block; padding: 2px 10px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-grow    { background: var(--blue-lt); color: var(--blue); }
+  .badge-run     { background: var(--teal-lt); color: var(--teal); }
+  .badge-gestao  { background: var(--amber-lt); color: var(--amber); }
+  .badge-outro   { background: var(--gray-lt); color: var(--gray); }
+  .badge-ativo   { background: var(--green-lt); color: var(--green); }
+  .badge-concluido { background: var(--teal-lt); color: var(--teal); }
+  .badge-pausado { background: var(--amber-lt); color: var(--amber); }
+  .badge-iniciar { background: var(--blue-lt); color: var(--blue); }
+  .badge-pendente { background: var(--gray-lt); color: var(--gray); }
+  .badge-andamento { background: var(--blue-lt); color: var(--blue); }
+  .badge-bloqueada { background: var(--red-lt); color: var(--red); }
+  .badge-feita { background: var(--green-lt); color: var(--green); }
+
+  .tx-verde { font-weight: 700; color: var(--green); }
+  .tx-amarelo { font-weight: 700; color: var(--amber); }
+  .tx-vermelho { font-weight: 700; color: var(--red); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center; padding: 40px 20px;
+    color: var(--gray); font-size: 13px;
+  }
+  .empty .icon { font-size: 32px; display: block; margin-bottom: 10px; }
+
+  /* ── PAINEL ── */
+  .painel-section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--gray);
+    margin: 20px 0 10px;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--navy); color: #fff;
+    padding: 12px 20px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500;
+    opacity: 0; transform: translateY(8px);
+    transition: all 0.2s; pointer-events: none; z-index: 999;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .sidebar { width: 56px; }
+    .sidebar-brand h1, .sidebar-brand p, .nav-item span, .sidebar-footer { display: none; }
+    .nav-item { justify-content: center; padding: 12px; }
+    .main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="compass">🧭</div>
+      <h1>Método Bússola</h1>
+      <p>Template Operacional</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="go('painel')">
+        <span class="icon">📊</span><span>Painel</span>
+      </div>
+      <div class="nav-item" onclick="go('epicos')">
+        <span class="icon">📌</span><span>Épicos</span>
+      </div>
+      <div class="nav-item" onclick="go('tarefas')">
+        <span class="icon">✅</span><span>Tarefas</span>
+      </div>
+      <div class="nav-item" onclick="go('metricas')">
+        <span class="icon">📈</span><span>Métricas</span>
+      </div>
+      <div class="nav-item" onclick="go('guia')">
+        <span class="icon">📖</span><span>Guia de Uso</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      Método Bússola<br>
+      Criado por Rafael<br>
+      Superfrete · 2025
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ══ PAINEL ══════════════════════════════════════════════════════════ -->
+    <div id="screen-painel" class="screen active">
+      <div class="page-header">
+        <h2>📊 Painel de Acompanhamento</h2>
+        <p>Visão consolidada do período — atualizada em tempo real.</p>
+      </div>
+      <div id="painel-content"></div>
+    </div>
+
+    <!-- ══ ÉPICOS ══════════════════════════════════════════════════════════ -->
+    <div id="screen-epicos" class="screen">
+      <div class="page-header">
+        <h2>📌 Épicos Estratégicos</h2>
+        <p>Toda tarefa precisa de um épico-pai. Cadastre aqui as iniciativas do período.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Novo épico</div>
+        <div class="form-row">
+          <div class="field" style="max-width:110px">
+            <label>Código</label>
+            <input id="ep-cod" placeholder="ARP-01">
+          </div>
+          <div class="field">
+            <label>Título</label>
+            <input id="ep-titulo" placeholder="Descreva a iniciativa estratégica">
+          </div>
+          <div class="field" style="max-width:120px">
+            <label>Categoria</label>
+            <select id="ep-cat">
+              <option value="Grow">Grow</option>
+              <option value="Run">Run</option>
+              <option value="Gestão">Gestão</option>
+              <option value="Não mapeado">Não mapeado</option>
+            </select>
+          </div>
+          <div class="field" style="max-width:150px">
+            <label>Responsável</label>
+            <input id="ep-resp" placeholder="Nome">
+          </div>
+          <div class="field" style="max-width:110px">
+            <label>Período</label>
+            <input id="ep-periodo" placeholder="Mai–Jun">
+          </div>
+          <div class="field" style="max-width:120px">
+            <label>Status</label>
+            <select id="ep-status">
+              <option value="Ativo">Ativo</option>
+              <option value="A iniciar">A iniciar</option>
+              <option value="Pausado">Pausado</option>
+              <option value="Concluído">Concluído</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addEpico()">+ Adicionar</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div id="epicos-table"></div>
+      </div>
+    </div>
+
+    <!-- ══ TAREFAS ═════════════════════════════════════════════════════════ -->
+    <div id="screen-tarefas" class="screen">
+      <div class="page-header">
+        <h2>✅ Tarefas Semanais</h2>
+        <p>Sem épico vinculado, a tarefa não entra na semana.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Nova tarefa</div>
+        <div class="form-row" style="margin-bottom:10px">
+          <div class="field">
+            <label>Descrição</label>
+            <input id="t-desc" placeholder="O que precisa ser feito essa semana?">
+          </div>
+          <div class="field" style="max-width:160px">
+            <label>Épico vinculado</label>
+            <select id="t-epico"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="max-width:150px">
+            <label>Responsável</label>
+            <input id="t-resp" placeholder="Nome">
+          </div>
+          <div class="field" style="max-width:150px">
+            <label>Semana</label>
+            <input id="t-semana" placeholder="26/05–30/05">
+          </div>
+          <div class="field" style="max-width:140px">
+            <label>Status</label>
+            <select id="t-status">
+              <option value="Pendente">Pendente</option>
+              <option value="Em andamento">Em andamento</option>
+              <option value="Concluída">Concluída</option>
+              <option value="Bloqueada">Bloqueada</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addTarefa()">+ Adicionar</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div id="tarefas-table"></div>
+      </div>
+    </div>
+
+    <!-- ══ MÉTRICAS ════════════════════════════════════════════════════════ -->
+    <div id="screen-metricas" class="screen">
+      <div class="page-header">
+        <h2>📈 Métricas Semanais</h2>
+        <p>Tokens e ativados por plataforma. A taxa de ativação é calculada automaticamente.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registrar métricas</div>
+        <div class="form-row">
+          <div class="field" style="max-width:150px">
+            <label>Semana</label>
+            <input id="m-semana" placeholder="26/05–30/05">
+          </div>
+          <div class="field">
+            <label>Plataforma / Parceiro</label>
+            <input id="m-plat" placeholder="Nuvemshop, Yampi, Wbuy...">
+          </div>
+          <div class="field" style="max-width:100px">
+            <label>Tokens</label>
+            <input id="m-tokens" type="number" min="0" placeholder="0">
+          </div>
+          <div class="field" style="max-width:100px">
+            <label>Ativados</label>
+            <input id="m-atv" type="number" min="0" placeholder="0">
+          </div>
+          <button class="btn btn-primary" onclick="addMetrica()">+ Registrar</button>
+        </div>
+      </div>
+
+      <div id="metricas-content"></div>
+
+      <div class="card" style="margin-top:4px;">
+        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--gray);">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--green-lt);border:2px solid var(--green);display:inline-block;"></span> ≥ 25% — Meta atingida</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--amber-lt);border:2px solid var(--amber);display:inline-block;"></span> 15–24% — Atenção</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:var(--red-lt);border:2px solid var(--red);display:inline-block;"></span> &lt; 15% — Abaixo da meta</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ GUIA ════════════════════════════════════════════════════════════ -->
+    <div id="screen-guia" class="screen">
+      <div class="page-header">
+        <h2>📖 Guia de Uso</h2>
+        <p>Como implementar o Método Bússola no seu time.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">O que é o Método Bússola</div>
+        <p style="font-size:14px;line-height:1.7;color:var(--text);">Framework de gestão operacional que conecta tarefas semanais a épicos estratégicos, garantindo que todo esforço do time tenha uma âncora de resultado. Criado e aplicado no time de parcerias da Superfrete.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Passo a passo</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          ${[
+            ['1', 'Mapeie os épicos estratégicos', 'Na aba Épicos: cadastre as iniciativas ativas com código, categoria (Grow/Run/Gestão) e responsável.'],
+            ['2', 'Atribua épicos por pessoa ou dupla', 'Cada membro precisa saber quais épicos são seus. Isso cria sentimento de dono.'],
+            ['3', 'Crie tarefas vinculadas ao épico', 'A pergunta obrigatória antes de qualquer tarefa: "qual épico isso alimenta?" Sem resposta, não entra.'],
+            ['4', 'Registre métricas semanalmente', 'Tokens e ativados por plataforma toda semana. A taxa é calculada automaticamente.'],
+            ['5', 'Revise no painel', 'Acompanhe os indicadores consolidados. A bússola aponta onde o time está e para onde vai.'],
+            ['6', 'Revisão mensal dos épicos', 'Épico sem tarefa há 4 semanas? Questione se ainda é prioridade.'],
+          ].map(([n, t, d]) => `
+            <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">${n}</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">${t}</div>
+                <div style="font-size:12px;color:var(--gray);line-height:1.5;">${d}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
+        ${[
+          ['📌', 'Rastreabilidade', 'Toda tarefa tem um épico-pai. Sem trabalho fantasma.', 'var(--blue-lt)', 'var(--blue)'],
+          ['🗓️', 'Cadência dupla', 'Visão da semana e do mês ao mesmo tempo.', 'var(--teal-lt)', 'var(--teal)'],
+          ['📈', 'Métricas de ativação', 'Mede resultado, não esforço.', 'var(--amber-lt)', 'var(--amber)'],
+          ['👤', 'Portfólio visível', 'Cada pessoa sabe o que é seu.', 'var(--coral-lt)', 'var(--coral)'],
+        ].map(([icon, title, desc, bg, color]) => `
+          <div style="background:${bg};border-radius:var(--radius-lg);padding:16px;">
+            <div style="font-size:20px;margin-bottom:8px;">${icon}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">${title}</div>
+            <div style="font-size:12px;color:var(--text);line-height:1.5;">${desc}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div class="card-title">Glossário</div>
+        <table style="font-size:13px;">
+          ${[
+            ['Épico', 'Iniciativa estratégica maior com código identificador (ex: ARP-02).'],
+            ['Token', 'Parceiro que chegou ao ponto de ativação.'],
+            ['Ativado', 'Parceiro que completou a primeira ação relevante.'],
+            ['Tx de ativação', 'Percentual de tokens ativados. Meta sugerida: ≥ 23%.'],
+            ['Representatividade', 'Peso do parceiro no resultado total.'],
+          ].map(([t, d]) => `
+            <tr>
+              <td style="font-weight:600;color:var(--navy);width:160px;padding:8px 12px 8px 0;border-bottom:1px solid var(--gray-lt);">${t}</td>
+              <td style="color:var(--text);padding:8px 0;border-bottom:1px solid var(--gray-lt);">${d}</td>
+            </tr>`).join('')}
+        </table>
+      </div>
+
+      <div style="background:var(--amber-lt);border-radius:var(--radius-lg);padding:16px 20px;font-size:13px;color:var(--amber);font-weight:600;line-height:1.6;">
+        💡 Regra de ouro: Toda tarefa precisa de uma âncora estratégica. Se você não consegue responder qual épico essa tarefa alimenta, ela não entra na semana.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const K = { ep: 'bussola_epicos', t: 'bussola_tarefas', m: 'bussola_metricas' };
+
+function load(k) { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch(e) { return []; } }
+function save(k, d) { try { localStorage.setItem(k, JSON.stringify(d)); } catch(e) {} }
+
+let epicos   = load(K.ep);
+let tarefas  = load(K.t);
+let metricas = load(K.m);
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelector(`[onclick="go('${id}')"]`).classList.add('active');
+  if (id === 'tarefas')  renderEpicoSelect();
+  if (id === 'painel')   renderPainel();
+  if (id === 'metricas') renderMetricas();
+  if (id === 'epicos')   renderEpicos();
+  if (id === 'tarefas')  renderTarefas();
+}
+
+// ── ÉPICOS ────────────────────────────────────────────────────────────────────
+function catBadge(cat) {
+  const map = { 'Grow': 'grow', 'Run': 'run', 'Gestão': 'gestao', 'Não mapeado': 'outro' };
+  return `<span class="badge badge-${map[cat] || 'outro'}">${cat}</span>`;
+}
+function statusBadge(st) {
+  const map = { 'Ativo': 'ativo', 'Concluído': 'concluido', 'Pausado': 'pausado', 'A iniciar': 'iniciar' };
+  return `<span class="badge badge-${map[st] || 'outro'}">${st}</span>`;
+}
+
+function addEpico() {
+  const cod     = document.getElementById('ep-cod').value.trim();
+  const titulo  = document.getElementById('ep-titulo').value.trim();
+  const cat     = document.getElementById('ep-cat').value;
+  const resp    = document.getElementById('ep-resp').value.trim();
+  const periodo = document.getElementById('ep-periodo').value.trim();
+  const status  = document.getElementById('ep-status').value;
+  if (!cod || !titulo) { toast('⚠️ Preencha código e título.'); return; }
+  epicos.push({ id: Date.now(), cod, titulo, cat, resp, periodo, status });
+  save(K.ep, epicos);
+  ['ep-cod','ep-titulo','ep-resp','ep-periodo'].forEach(id => document.getElementById(id).value = '');
+  renderEpicos();
+  toast('✅ Épico adicionado!');
+}
+
+function delEpico(id) {
+  epicos = epicos.filter(e => e.id !== id);
+  save(K.ep, epicos);
+  renderEpicos();
+  toast('Épico removido.');
+}
+
+function renderEpicos() {
+  const el = document.getElementById('epicos-table');
+  if (!epicos.length) {
+    el.innerHTML = `<div class="empty"><span class="icon">📌</span>Nenhum épico cadastrado ainda.<br><span style="font-size:12px;margin-top:6px;display:block;">Adicione o primeiro épico acima.</span></div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Código</th><th>Título</th><th>Categoria</th>
+        <th>Responsável</th><th>Período</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${epicos.map(e => `
+          <tr>
+            <td><strong style="color:var(--blue);">${e.cod}</strong></td>
+            <td style="max-width:280px;">${e.titulo}</td>
+            <td>${catBadge(e.cat)}</td>
+            <td>${e.resp || '—'}</td>
+            <td style="white-space:nowrap;">${e.periodo || '—'}</td>
+            <td>${statusBadge(e.status)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="delEpico(${e.id})">✕</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+// ── TAREFAS ───────────────────────────────────────────────────────────────────
+function renderEpicoSelect() {
+  const sel = document.getElementById('t-epico');
+  sel.innerHTML = epicos.length
+    ? epicos.map(e => `<option value="${e.id}">${e.cod} — ${e.titulo.substring(0, 35)}${e.titulo.length > 35 ? '…' : ''}</option>`).join('')
+    : '<option value="">Cadastre épicos primeiro</option>';
+}
+
+function statusTBadge(st) {
+  const map = { 'Pendente': 'pendente', 'Em andamento': 'andamento', 'Concluída': 'feita', 'Bloqueada': 'bloqueada' };
+  return `<span class="badge badge-${map[st] || 'pendente'}">${st}</span>`;
+}
+
+function addTarefa() {
+  const desc   = document.getElementById('t-desc').value.trim();
+  const epicoId= document.getElementById('t-epico').value;
+  const resp   = document.getElementById('t-resp').value.trim();
+  const semana = document.getElementById('t-semana').value.trim();
+  const status = document.getElementById('t-status').value;
+  if (!desc) { toast('⚠️ Descreva a tarefa.'); return; }
+  if (!epicoId) { toast('⚠️ Vincule a tarefa a um épico.'); return; }
+  const ep = epicos.find(e => e.id == epicoId);
+  tarefas.push({ id: Date.now(), desc, epicoId, epicoCod: ep ? ep.cod : '—', resp, semana, status });
+  save(K.t, tarefas);
+  document.getElementById('t-desc').value = '';
+  document.getElementById('t-resp').value = '';
+  document.getElementById('t-semana').value = '';
+  renderTarefas();
+  toast('✅ Tarefa adicionada!');
+}
+
+function delTarefa(id) {
+  tarefas = tarefas.filter(t => t.id !== id);
+  save(K.t, tarefas);
+  renderTarefas();
+  toast('Tarefa removida.');
+}
+
+function renderTarefas() {
+  const el = document.getElementById('tarefas-table');
+  if (!tarefas.length) {
+    el.innerHTML = `<div class="empty"><span class="icon">✅</span>Nenhuma tarefa ainda.<br><span style="font-size:12px;margin-top:6px;display:block;">Crie a primeira tarefa vinculando a um épico.</span></div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Descrição</th><th>Épico</th><th>Responsável</th>
+        <th>Semana</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${tarefas.map(t => `
+          <tr>
+            <td style="max-width:280px;">${t.desc}</td>
+            <td><strong style="color:var(--blue);">${t.epicoCod}</strong></td>
+            <td>${t.resp || '—'}</td>
+            <td style="white-space:nowrap;">${t.semana || '—'}</td>
+            <td>${statusTBadge(t.status)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="delTarefa(${t.id})">✕</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+// ── MÉTRICAS ──────────────────────────────────────────────────────────────────
+function addMetrica() {
+  const semana  = document.getElementById('m-semana').value.trim();
+  const plat    = document.getElementById('m-plat').value.trim();
+  const tokens  = parseInt(document.getElementById('m-tokens').value) || 0;
+  const ativados= parseInt(document.getElementById('m-atv').value) || 0;
+  if (!semana || !plat) { toast('⚠️ Preencha semana e plataforma.'); return; }
+  metricas.push({ id: Date.now(), semana, plat, tokens, ativados });
+  save(K.m, metricas);
+  ['m-plat','m-tokens','m-atv'].forEach(id => document.getElementById(id).value = '');
+  renderMetricas();
+  toast('✅ Métrica registrada!');
+}
+
+function delMetrica(id) {
+  metricas = metricas.filter(m => m.id !== id);
+  save(K.m, metricas);
+  renderMetricas();
+  toast('Métrica removida.');
+}
+
+function txClass(tx) {
+  if (tx >= 25) return 'tx-verde';
+  if (tx >= 15) return 'tx-amarelo';
+  return 'tx-vermelho';
+}
+
+function renderMetricas() {
+  const el = document.getElementById('metricas-content');
+  if (!metricas.length) {
+    el.innerHTML = `<div class="card"><div class="empty"><span class="icon">📈</span>Nenhuma métrica registrada ainda.</div></div>`;
+    return;
+  }
+  const semanas = [...new Set(metricas.map(m => m.semana))].reverse();
+  el.innerHTML = semanas.map(s => {
+    const rows = metricas.filter(m => m.semana === s);
+    const totalT = rows.reduce((a, r) => a + r.tokens, 0);
+    const totalA = rows.reduce((a, r) => a + r.ativados, 0);
+    const txTotal = totalT > 0 ? Math.round((totalA / totalT) * 100) : 0;
+    return `
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div class="card-title" style="margin-bottom:0;">📅 Semana ${s}</div>
+          <div style="font-size:12px;color:var(--gray);">
+            Total: ${totalT} tokens → ${totalA} ativados —
+            <span class="${txClass(txTotal)}">${txTotal}% de ativação</span>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Plataforma</th><th>Tokens</th><th>Ativados</th><th>Tx Ativação</th><th></th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(r => {
+              const tx = r.tokens > 0 ? Math.round((r.ativados / r.tokens) * 100) : 0;
+              return `<tr>
+                <td><strong>${r.plat}</strong></td>
+                <td style="text-align:center;">${r.tokens}</td>
+                <td style="text-align:center;">${r.ativados}</td>
+                <td style="text-align:center;"><span class="${txClass(tx)}">${tx}%</span></td>
+                <td><button class="btn btn-sm btn-danger" onclick="delMetrica(${r.id})">✕</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── PAINEL ────────────────────────────────────────────────────────────────────
+function renderPainel() {
+  const el = document.getElementById('painel-content');
+
+  const totalEp    = epicos.filter(e => e.status === 'Ativo').length;
+  const totalT     = tarefas.length;
+  const concluidas = tarefas.filter(t => t.status === 'Concluída').length;
+  const pct        = totalT > 0 ? Math.round((concluidas / totalT) * 100) : 0;
+  const totalTok   = metricas.reduce((a, m) => a + m.tokens, 0);
+  const totalAtv   = metricas.reduce((a, m) => a + m.ativados, 0);
+  const txGeral    = totalTok > 0 ? Math.round((totalAtv / totalTok) * 100) : 0;
+
+  const epCats = { Grow: 0, Run: 0, Gestão: 0 };
+  epicos.filter(e => e.status === 'Ativo').forEach(e => {
+    if (epCats[e.cat] !== undefined) epCats[e.cat]++;
+  });
+
+  const platMap = new Map();
+  metricas.forEach(m => {
+    if (!platMap.has(m.plat)) platMap.set(m.plat, { tokens: 0, ativados: 0 });
+    platMap.get(m.plat).tokens   += m.tokens;
+    platMap.get(m.plat).ativados += m.ativados;
+  });
+  const topPlat = [...platMap.entries()]
+    .map(([plat, d]) => ({ plat, ...d, tx: d.tokens > 0 ? Math.round((d.ativados / d.tokens) * 100) : 0 }))
+    .sort((a, b) => b.ativados - a.ativados)
+    .slice(0, 6);
+
+  const empty = !totalEp && !totalT && !totalTok;
+  if (empty) {
+    el.innerHTML = `<div class="card"><div class="empty" style="padding:60px 20px;"><span class="icon">🧭</span>Comece cadastrando épicos e registrando métricas para ver o painel completo.</div></div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="label">Épicos ativos</div>
+        <div class="value">${totalEp}</div>
+        <div class="sub">Grow: ${epCats.Grow} · Run: ${epCats.Run} · Gestão: ${epCats.Gestão}</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Tarefas cadastradas</div>
+        <div class="value">${totalT}</div>
+        <div class="sub">${concluidas} concluídas (${pct}%)</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Total tokens registrados</div>
+        <div class="value">${totalTok}</div>
+        <div class="sub">${totalAtv} ativados no período</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Tx de ativação geral</div>
+        <div class="value" style="color:${txGeral >= 25 ? 'var(--green)' : txGeral >= 15 ? 'var(--amber)' : 'var(--red)'};">${txGeral}%</div>
+        <div class="sub">Meta sugerida: ≥ 23%</div>
+      </div>
+    </div>
+
+    ${totalT > 0 ? `
+    <div class="card">
+      <div class="card-title">Progresso das tarefas</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;">
+          <div style="height:8px;background:var(--gray-lt);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:var(--blue);border-radius:4px;transition:width 0.4s;"></div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);min-width:40px;">${pct}%</div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--gray);flex-wrap:wrap;">
+        <span>✅ Concluídas: ${concluidas}</span>
+        <span>🔵 Em andamento: ${tarefas.filter(t => t.status === 'Em andamento').length}</span>
+        <span>⚪ Pendentes: ${tarefas.filter(t => t.status === 'Pendente').length}</span>
+        <span>🔴 Bloqueadas: ${tarefas.filter(t => t.status === 'Bloqueada').length}</span>
+      </div>
+    </div>` : ''}
+
+    ${topPlat.length ? `
+    <div class="card">
+      <div class="card-title">Ranking de plataformas por ativação</div>
+      <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Plataforma</th><th>Tokens</th><th>Ativados</th><th>Tx Ativação</th>
+        </tr></thead>
+        <tbody>
+          ${topPlat.map(p => `
+            <tr>
+              <td><strong>${p.plat}</strong></td>
+              <td style="text-align:center;">${p.tokens}</td>
+              <td style="text-align:center;">${p.ativados}</td>
+              <td style="text-align:center;"><span class="${txClass(p.tx)}">${p.tx}%</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+// Init
+renderEpicos();
+renderTarefas();
+renderPainel();
+</script>
+</body>
+</html>
