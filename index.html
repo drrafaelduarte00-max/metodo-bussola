@@ -439,52 +439,79 @@
       <div class="card">
         <div class="card-title">Passo a passo</div>
         <div style="display:flex;flex-direction:column;gap:0;">
-          ${[
-            ['1', 'Mapeie os épicos estratégicos', 'Na aba Épicos: cadastre as iniciativas ativas com código, categoria (Grow/Run/Gestão) e responsável.'],
-            ['2', 'Atribua épicos por pessoa ou dupla', 'Cada membro precisa saber quais épicos são seus. Isso cria sentimento de dono.'],
-            ['3', 'Crie tarefas vinculadas ao épico', 'A pergunta obrigatória antes de qualquer tarefa: "qual épico isso alimenta?" Sem resposta, não entra.'],
-            ['4', 'Registre métricas semanalmente', 'Tokens e ativados por plataforma toda semana. A taxa é calculada automaticamente.'],
-            ['5', 'Revise no painel', 'Acompanhe os indicadores consolidados. A bússola aponta onde o time está e para onde vai.'],
-            ['6', 'Revisão mensal dos épicos', 'Épico sem tarefa há 4 semanas? Questione se ainda é prioridade.'],
-          ].map(([n, t, d]) => `
-            <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
-              <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">${n}</div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">${t}</div>
-                <div style="font-size:12px;color:var(--gray);line-height:1.5;">${d}</div>
-              </div>
-            </div>`).join('')}
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">1</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">Mapeie os épicos estratégicos</div><div style="font-size:12px;color:var(--gray);line-height:1.5;">Na aba Épicos: cadastre as iniciativas ativas com código, categoria (Grow/Run/Gestão) e responsável.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">2</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">Atribua épicos por pessoa ou dupla</div><div style="font-size:12px;color:var(--gray);line-height:1.5;">Cada membro precisa saber quais épicos são seus. Isso cria sentimento de dono.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">3</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">Crie tarefas vinculadas ao épico</div><div style="font-size:12px;color:var(--gray);line-height:1.5;">A pergunta obrigatória antes de qualquer tarefa: "qual épico isso alimenta?" Sem resposta, não entra.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">4</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">Registre métricas semanalmente</div><div style="font-size:12px;color:var(--gray);line-height:1.5;">Tokens e ativados por plataforma toda semana. A taxa é calculada automaticamente.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-lt);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">5</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">Revise no painel</div><div style="font-size:12px;color:var(--gray);line-height:1.5;">Acompanhe os indicadores consolidados. A bússola aponta onde o time está e para onde vai.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;">6</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;">Revisão mensal dos épicos</div><div style="font-size:12px;color:var(--gray);line-height:1.5;">Épico sem tarefa há 4 semanas? Questione se ainda é prioridade.</div></div>
+          </div>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;">
-        ${[
-          ['📌', 'Rastreabilidade', 'Toda tarefa tem um épico-pai. Sem trabalho fantasma.', 'var(--blue-lt)', 'var(--blue)'],
-          ['🗓️', 'Cadência dupla', 'Visão da semana e do mês ao mesmo tempo.', 'var(--teal-lt)', 'var(--teal)'],
-          ['📈', 'Métricas de ativação', 'Mede resultado, não esforço.', 'var(--amber-lt)', 'var(--amber)'],
-          ['👤', 'Portfólio visível', 'Cada pessoa sabe o que é seu.', 'var(--coral-lt)', 'var(--coral)'],
-        ].map(([icon, title, desc, bg, color]) => `
-          <div style="background:${bg};border-radius:var(--radius-lg);padding:16px;">
-            <div style="font-size:20px;margin-bottom:8px;">${icon}</div>
-            <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">${title}</div>
-            <div style="font-size:12px;color:var(--text);line-height:1.5;">${desc}</div>
-          </div>`).join('')}
+        <div style="background:var(--blue-lt);border-radius:var(--radius-lg);padding:16px;">
+          <div style="font-size:20px;margin-bottom:8px;">📌</div>
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">Rastreabilidade</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.5;">Toda tarefa tem um épico-pai. Sem trabalho fantasma.</div>
+        </div>
+        <div style="background:var(--teal-lt);border-radius:var(--radius-lg);padding:16px;">
+          <div style="font-size:20px;margin-bottom:8px;">🗓️</div>
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">Cadência dupla</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.5;">Visão da semana e do mês ao mesmo tempo.</div>
+        </div>
+        <div style="background:var(--amber-lt);border-radius:var(--radius-lg);padding:16px;">
+          <div style="font-size:20px;margin-bottom:8px;">📈</div>
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">Métricas de ativação</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.5;">Mede resultado, não esforço.</div>
+        </div>
+        <div style="background:var(--coral-lt);border-radius:var(--radius-lg);padding:16px;">
+          <div style="font-size:20px;margin-bottom:8px;">👤</div>
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">Portfólio visível</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.5;">Cada pessoa sabe o que é seu.</div>
+        </div>
       </div>
 
       <div class="card">
         <div class="card-title">Glossário</div>
-        <table style="font-size:13px;">
-          ${[
-            ['Épico', 'Iniciativa estratégica maior com código identificador (ex: ARP-02).'],
-            ['Token', 'Parceiro que chegou ao ponto de ativação.'],
-            ['Ativado', 'Parceiro que completou a primeira ação relevante.'],
-            ['Tx de ativação', 'Percentual de tokens ativados. Meta sugerida: ≥ 23%.'],
-            ['Representatividade', 'Peso do parceiro no resultado total.'],
-          ].map(([t, d]) => `
-            <tr>
-              <td style="font-weight:600;color:var(--navy);width:160px;padding:8px 12px 8px 0;border-bottom:1px solid var(--gray-lt);">${t}</td>
-              <td style="color:var(--text);padding:8px 0;border-bottom:1px solid var(--gray-lt);">${d}</td>
-            </tr>`).join('')}
+        <table style="font-size:13px;width:100%;">
+          <tr>
+            <td style="font-weight:600;color:var(--navy);width:160px;padding:8px 12px 8px 0;border-bottom:1px solid var(--gray-lt);">Épico</td>
+            <td style="color:var(--text);padding:8px 0;border-bottom:1px solid var(--gray-lt);">Iniciativa estratégica maior com código identificador (ex: ARP-02).</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--navy);padding:8px 12px 8px 0;border-bottom:1px solid var(--gray-lt);">Token</td>
+            <td style="color:var(--text);padding:8px 0;border-bottom:1px solid var(--gray-lt);">Parceiro que chegou ao ponto de ativação.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--navy);padding:8px 12px 8px 0;border-bottom:1px solid var(--gray-lt);">Ativado</td>
+            <td style="color:var(--text);padding:8px 0;border-bottom:1px solid var(--gray-lt);">Parceiro que completou a primeira ação relevante.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--navy);padding:8px 12px 8px 0;border-bottom:1px solid var(--gray-lt);">Tx de ativação</td>
+            <td style="color:var(--text);padding:8px 0;border-bottom:1px solid var(--gray-lt);">Percentual de tokens ativados. Meta sugerida: ≥ 23%.</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--navy);padding:8px 12px 8px 0;">Representatividade</td>
+            <td style="color:var(--text);padding:8px 0;">Peso do parceiro no resultado total.</td>
+          </tr>
         </table>
       </div>
 
